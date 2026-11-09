@@ -1,14 +1,43 @@
 import { Router } from "express";
 import { listingsCollection } from "../db";
-import { ObjectId } from "mongodb";
+import { ObjectId, type Filter } from "mongodb";
+import type { Listing } from "../types";
 
 const router = Router();
 
 const LIST_FIELDS = { title: 1, price: 1, category: 1, city: 1, status: 1 };
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
+    const filter: Filter<Listing> = {};
+
+    if (typeof req.query.category === "string") {
+        filter.category = req.query.category;
+    }
+
+    if (typeof req.query.city === "string") {
+        filter.city = req.query.city;
+    }
+
+    if (req.query.maxPrice !== undefined) {
+        const rawMaxPrice = req.query.maxPrice;
+
+        if (typeof rawMaxPrice !== "string" || rawMaxPrice.trim() === "") {
+            res.status(400).json({ error: "maxPrice debe ser un número" });
+            return;
+        }
+
+        const maxPrice = Number(rawMaxPrice);
+
+        if (!Number.isFinite(maxPrice)) {
+            res.status(400).json({ error: "maxPrice debe ser un número" });
+            return;
+        }
+
+        filter.price = { $lte: maxPrice };
+    }
+
     const listings = await listingsCollection()
-        .find()
+        .find(filter)
         .project(LIST_FIELDS)
         .sort({ publishedAt: -1 })
         .toArray();
