@@ -6,7 +6,8 @@ const app = express();
 const PORT = 3000;
 
 app.use((req, _res, next) => {
-    console.log(`${req.method} ${encodeURI(req.url)}`);
+    const logEntry = JSON.stringify({ method: req.method, url: req.url });
+    process.stdout.write(`${logEntry}\n`);
     next();
 });
 
