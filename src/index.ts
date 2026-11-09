@@ -6,7 +6,7 @@ const app = express();
 const PORT = 3000;
 
 app.use((req, _res, next) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log(`${req.method} ${encodeURI(req.url)}`);
     next();
 });
 
@@ -39,4 +39,7 @@ async function start() {
     });
 }
 
-start();
+start().catch((error: unknown) => {
+    console.error("No se pudo iniciar el servidor", error);
+    process.exitCode = 1;
+});
