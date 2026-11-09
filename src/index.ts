@@ -1,6 +1,7 @@
 import express from "express";
 import type { NextFunction, Request, Response } from "express";
 import { connectDb, getDb } from "./db";
+import listingsRouter from "./routes/listings";
 
 const app = express();
 const PORT = 3000;
@@ -17,6 +18,8 @@ app.get("/api/health", async (_req, res) => {
     await getDb().command({ ping: 1 });
     res.json({ status: "ok", db: getDb().databaseName });
 });
+
+app.use("/api/listings", listingsRouter);
 
 app.use((req, res) => {
     res.status(404).json({ error: `No existe la ruta ${req.method} ${req.url}` });
