@@ -8,5 +8,5 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor de Kevin escuchando en http://localhost:${PORT}`);
+    console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
