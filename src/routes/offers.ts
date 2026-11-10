@@ -51,6 +51,11 @@ router.post("/", async (req, res) => {
         return;
     }
 
+    if (listing.seller.id.equals(buyerId)) {
+        res.status(400).json({ error: "No puedes ofertar por tu propio anuncio" });
+        return;
+    }
+
     if (listing.status !== "AVAILABLE") {
         res.status(409).json({ error: "El anuncio no está disponible para recibir ofertas" });
         return;
