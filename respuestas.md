@@ -19,3 +19,7 @@ Con MongoDB parado, `GET /api/health` devolvió `500`. Respondió el middleware 
 ## Ejercicio 4
 
 **Pregunta 3.** La API ignora `views` y `status` porque son datos que debe controlar el servidor. Si aceptara los valores del cliente, alguien podría falsear las visitas o publicar un anuncio directamente como vendido.
+
+## Ejercicio 5
+
+**Pregunta 4.** No. `listing.price` en la oferta es una copia del precio que tenía el iPhone cuando Sara la hizo; cambiarla borraría ese dato histórico. El `PATCH` solo debe actualizar el precio del anuncio.

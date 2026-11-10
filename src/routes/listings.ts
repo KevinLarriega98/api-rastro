@@ -140,4 +140,62 @@ router.post("/", async (req, res) => {
     res.status(201).json({ _id: result.insertedId, ...listing });
 });
 
+router.patch("/:id", async (req, res) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+        res.status(400).json({ error: "El id del anuncio no es válido" });
+        return;
+    }
+
+    const body: unknown = req.body;
+
+    if (!isRecord(body)) {
+        res.status(400).json({ error: "El body debe ser un objeto" });
+        return;
+    }
+
+    if (
+        typeof body.price !== "number" ||
+        !Number.isFinite(body.price) ||
+        body.price < 0
+    ) {
+        res.status(400).json({ error: "price debe ser un número mayor o igual que 0" });
+        return;
+    }
+
+    const listing = await listingsCollection().findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { price: body.price } },
+        { returnDocument: "after" },
+    );
+
+    if (!listing) {
+        res.status(404).json({ error: "Anuncio no encontrado" });
+        return;
+    }
+
+    res.json(listing);
+});
+
+router.delete("/:id", async (req, res) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+        res.status(400).json({ error: "El id del anuncio no es válido" });
+        return;
+    }
+
+    const result = await listingsCollection().deleteOne({
+        _id: new ObjectId(id),
+    });
+
+    if (result.deletedCount === 0) {
+        res.status(404).json({ error: "Anuncio no encontrado" });
+        return;
+    }
+
+    res.status(204).send();
+});
+
 export default router;
