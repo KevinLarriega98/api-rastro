@@ -68,4 +68,48 @@ router.post("/", async (req, res) => {
     res.status(201).json({ _id: result.insertedId, ...offer });
 });
 
+router.patch("/:id", async (req, res) => {
+    const id = req.params.id;
+    if (!ObjectId.isValid(id)) {
+        res.status(400).json({ error: "El id de la oferta no es válido" });
+        return;
+    }
+
+    const body: unknown = req.body;
+    if (!isRecord(body) || body.status !== "ACCEPTED") {
+        res.status(400).json({ error: "status debe ser ACCEPTED" });
+        return;
+    }
+
+    const offerId = new ObjectId(id);
+    const offer = await offersCollection().findOne({ _id: offerId });
+    if (!offer) {
+        res.status(404).json({ error: "Oferta no encontrada" });
+        return;
+    }
+
+    if (offer.status !== "PENDING") {
+        res.status(409).json({ error: "La oferta ya no está pendiente" });
+        return;
+    }
+
+    const updatedOffer = await offersCollection().findOneAndUpdate(
+        { _id: offerId, status: "PENDING" },
+        { $set: { status: "ACCEPTED" } },
+        { returnDocument: "after" },
+    );
+
+    if (!updatedOffer) {
+        res.status(409).json({ error: "La oferta ya no está pendiente" });
+        return;
+    }
+
+    await listingsCollection().updateOne(
+        { _id: offer.listing.id },
+        { $set: { status: "RESERVED" } },
+    );
+
+    res.json(updatedOffer);
+});
+
 export default router;
