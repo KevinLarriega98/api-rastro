@@ -29,3 +29,7 @@ remote: - Changes must be made through a pull request.
 **Pregunta 5.** Ofertar por un anuncio vendido devuelve `409` porque la petición tiene datos válidos, pero entra en conflicto con el estado actual del anuncio. `400` indicaría que los datos enviados son incorrectos.
 
 **Pregunta 6.** MongoDB comprueba, por ejemplo, que el `_id` de cada oferta sea único. La API debe comprobar que las referencias existen: antes de guardar una oferta busca el anuncio y el comprador indicados por sus IDs.
+
+## Reto opcional 1
+
+Si el servidor se apaga después de aceptar la oferta y antes de reservar el anuncio, los datos quedan inconsistentes: la oferta figura como `ACCEPTED`, pero el anuncio sigue `AVAILABLE`. Una transacción permitiría confirmar ambas escrituras juntas.
