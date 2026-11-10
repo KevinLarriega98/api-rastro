@@ -72,6 +72,20 @@ router.get("/:id/offers", async (req, res) => {
     res.json(offers);
 });
 
+router.get("/stats", async (_req, res) => {
+    const stats = await listingsCollection().aggregate<{
+        category: string;
+        count: number;
+        averagePrice: number;
+    }>([
+        { $group: { _id: "$category", count: { $sum: 1 }, averagePrice: { $avg: "$price" } } },
+        { $project: { _id: 0, category: "$_id", count: 1, averagePrice: 1 } },
+        { $sort: { category: 1 } },
+    ]).toArray();
+
+    res.json(stats);
+});
+
 router.get("/:id", async (req, res) => {
     const id = req.params.id;
 
