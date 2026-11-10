@@ -33,3 +33,7 @@ remote: - Changes must be made through a pull request.
 ## Reto opcional 1
 
 Si el servidor se apaga después de aceptar la oferta y antes de reservar el anuncio, los datos quedan inconsistentes: la oferta figura como `ACCEPTED`, pero el anuncio sigue `AVAILABLE`. Una transacción permitiría confirmar ambas escrituras juntas.
+
+## Reto opcional 3
+
+Al poner `GET /stats` después de `GET /:id`, la petición devolvió `400`: Express interpretó `stats` como el parámetro `id` y este no tenía formato de ObjectId. La ruta específica debe ir antes de la ruta con parámetro.
