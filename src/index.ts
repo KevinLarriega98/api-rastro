@@ -2,6 +2,7 @@ import express from "express";
 import type { NextFunction, Request, Response } from "express";
 import { connectDb, getDb } from "./db";
 import listingsRouter from "./routes/listings";
+import offersRouter from "./routes/offers";
 
 const app = express();
 const PORT = 3000;
@@ -20,6 +21,7 @@ app.get("/api/health", async (_req, res) => {
 });
 
 app.use("/api/listings", listingsRouter);
+app.use("/api/offers", offersRouter);
 
 app.use((req, res) => {
     res.status(404).json({ error: `No existe la ruta ${req.method} ${req.url}` });
