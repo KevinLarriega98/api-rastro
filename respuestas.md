@@ -15,3 +15,7 @@ Con MongoDB parado, `GET /api/health` devolvió `500`. Respondió el middleware 
 ## Ejercicio 3.1
 
 **Pregunta 2.** `?price=380` llega desde la URL como texto (`"380"`), pero MongoDB guarda `price` como número (`380`), así que no encuentra coincidencias. `category=Cars` sí funciona porque `category` está guardada como texto.
+
+## Ejercicio 4
+
+**Pregunta 3.** La API ignora `views` y `status` porque son datos que debe controlar el servidor. Si aceptara los valores del cliente, alguien podría falsear las visitas o publicar un anuncio directamente como vendido.

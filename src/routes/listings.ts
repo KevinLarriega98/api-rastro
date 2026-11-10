@@ -1,11 +1,19 @@
 import { Router } from "express";
-import { listingsCollection } from "../db";
+import { listingsCollection, usersCollection } from "../db";
 import { ObjectId, type Filter } from "mongodb";
 import type { Listing } from "../types";
 
 const router = Router();
 
 const LIST_FIELDS = { title: 1, price: 1, category: 1, city: 1, status: 1 };
+
+function isNonEmptyText(value: unknown): value is string {
+    return typeof value === "string" && value.trim().length > 0;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 router.get("/", async (req, res) => {
     const filter: Filter<Listing> = {};
@@ -65,6 +73,71 @@ router.get("/:id", async (req, res) => {
     }
 
     res.json(listing);
+});
+
+router.post("/", async (req, res) => {
+    const body: unknown = req.body;
+
+    if (!isRecord(body)) {
+        res.status(400).json({ error: "El body debe ser un objeto" });
+        return;
+    }
+
+    if (
+        !isNonEmptyText(body.title) ||
+        !isNonEmptyText(body.description) ||
+        !isNonEmptyText(body.category) ||
+        !isNonEmptyText(body.city)
+    ) {
+        res.status(400).json({ error: "Falta un campo de texto obligatorio" });
+        return;
+    }
+
+    if (
+        typeof body.price !== "number" ||
+        !Number.isFinite(body.price) ||
+        body.price < 0
+    ) {
+        res.status(400).json({ error: "price debe ser un número mayor o igual que 0" });
+        return;
+    }
+
+    if (typeof body.sellerId !== "string" || !ObjectId.isValid(body.sellerId)) {
+        res.status(400).json({ error: "sellerId no tiene un formato válido" });
+        return;
+    }
+
+    const seller = await usersCollection().findOne({
+        _id: new ObjectId(body.sellerId),
+    });
+
+    if (!seller) {
+        res.status(400).json({ error: "No existe ningún usuario con ese sellerId" });
+        return;
+    }
+
+    const attributes = body.attributes;
+    if (attributes !== undefined && !isRecord(attributes)) {
+        res.status(400).json({ error: "attributes debe ser un objeto" });
+        return;
+    }
+
+    const listing: Listing = {
+        title: body.title,
+        description: body.description,
+        price: body.price,
+        category: body.category,
+        city: body.city,
+        status: "AVAILABLE",
+        publishedAt: new Date(),
+        views: 0,
+        seller: { id: new ObjectId(body.sellerId), name: seller.name },
+        photos: [],
+        attributes: attributes ?? {},
+    };
+
+    const result = await listingsCollection().insertOne(listing);
+    res.status(201).json({ _id: result.insertedId, ...listing });
 });
 
 export default router;
